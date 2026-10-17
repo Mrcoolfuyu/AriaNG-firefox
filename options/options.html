@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <title>__MSG_configPageTitle__</title>
+  <meta name="viewport" content="initial-scale=1, width=device-width" />
+  <link rel="icon" href="../images/logo32.png" />
+  <link rel="stylesheet" href="options.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <span id="logo"><img src="../images/logo48.png" alt="logo" /> __MSG_configPageTitle__</span>
+      <span id="version"></span>
+    </div>
+  </nav>
+
+  <form id="options-form" autocomplete="off">
+    <div class="container">
+
+      <!-- 右键菜单 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">📋</span>__MSG_contextmenuStr__</label>
+        <div class="row-content">
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="contextMenus" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_contextmenuDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="askBeforeExport" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_askBeforeExportDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="exportAll" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_exportAllDes__</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下载拦截 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">📥</span>__MSG_downloadCaptureStr__</label>
+        <div class="row-content">
+          <div class="switch-item inline-size">
+            <label class="switch"><input type="checkbox" id="integration" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_downloadCaptureDes__ ≥</span>
+            <input type="number" min="0" step="1" id="fileSize" />
+            <select id="fileSizeUnit">
+              <option value="MB">__MSG_fileSizeUnitMB__</option>
+              <option value="GB">__MSG_fileSizeUnitGB__</option>
+            </select>
+            <span id="shortcuts-setting" class="icon-btn tool-tip" title="⌨: Alt + A">⚙️</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="checkClick" /><span class="slider"></span></label>
+            <span class="switch-text tool-tip" title="__MSG_checkAltClickTip__">__MSG_checkAltClickDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="askBeforeDownload" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_askBeforeDownloadDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="allowExternalRequest" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_allowExternalRequestDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="captureMagnet" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_captureMagnetDes__
+              <em class="warn-text">（__MSG_captureMagnetWarn__）</em>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 监测Aria2状态 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">🩺</span>__MSG_monitorAria2Str__</label>
+        <div class="row-content">
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="monitorAria2" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_monitorAria2Des__</span>
+          </div>
+          <div class="switch-item" id="monitor-all">
+            <label class="switch"><input type="checkbox" id="monitorAll" /><span class="slider"></span></label>
+            <span class="switch-text tool-tip" title="__MSG_monitorAllTip__">__MSG_monitorAllDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="badgeText" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_badgeTextDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="allowNotification" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_allowNotificationDes__</span>
+          </div>
+          <div class="switch-item">
+            <label class="switch"><input type="checkbox" id="keepSilent" /><span class="slider"></span></label>
+            <span class="switch-text">__MSG_keepSilentDes__</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aria2-RPC-Server -->
+      <div id="rpcList"></div>
+
+      <!-- AriaNG打开方式 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">🪟</span>__MSG_WebUIOpenStyleStr__</label>
+        <div class="row-content">
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="popup" name="webUIOpenStyle" value="popup" />
+            <label for="popup">__MSG_WebUIOpenStyle1__</label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="tab" name="webUIOpenStyle" value="tab" />
+            <label for="tab">__MSG_WebUIOpenStyle2__</label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="window" name="webUIOpenStyle" value="window" />
+            <label for="window">__MSG_WebUIOpenStyle3__</label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="sidebar" name="webUIOpenStyle" value="sidebar" />
+            <label for="sidebar">__MSG_WebUIOpenStyle4__ <em class="beta-text">(Beta)</em></label>
+            <em class="warn-text" id="sidebar-warn" style="display:none">__MSG_sidebarUnsupportedTip__</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- 拦截状态图标 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">🖼</span>__MSG_IconOffStyleStr__</label>
+        <div class="row-content icon-picker">
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="iconDefault" name="iconOffStyle" value="Default" />
+            <label for="iconDefault"><img src="../images/logo32.png" alt="icon" title="__MSG_iconStyleDefault__" /></label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="iconDark" name="iconOffStyle" value="Dark" />
+            <label for="iconDark"><img src="../images/logo32-dark.png" alt="icon" title="__MSG_iconStyleDark__" /></label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="iconDusk" name="iconOffStyle" value="Dusk" />
+            <label for="iconDusk"><img src="../images/logo32-dusk.png" alt="icon" title="__MSG_iconStyleDusk__" /></label>
+          </div>
+          <div class="radio-item">
+            <input class="radio-input" type="radio" id="iconGrey" name="iconOffStyle" value="Grey" />
+            <label for="iconGrey"><img src="../images/logo32-grey.png" alt="icon" title="__MSG_iconStyleGrey__" /></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 扩展名 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">📄</span>__MSG_fileExtStr__</label>
+        <div class="row-content list-editor">
+          <div class="list-col">
+            <label for="allowedExts">__MSG_whiteListStr__</label>
+            <textarea id="allowedExts" rows="8" placeholder="__MSG_allowedExtsPlaceholderDes__"></textarea>
+          </div>
+          <div class="list-col">
+            <label for="blockedExts">__MSG_BlackListStr__</label>
+            <textarea id="blockedExts" rows="8" placeholder="__MSG_blockedExtsPlaceholderDes__"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 网站 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">🌐</span>__MSG_websiteStr__</label>
+        <div class="row-content list-editor">
+          <div class="list-col">
+            <label for="allowedSites">__MSG_whiteListStr__</label>
+            <textarea id="allowedSites" rows="7" placeholder="__MSG_allowedSitesPlaceholderDes__"></textarea>
+          </div>
+          <div class="list-col">
+            <label for="blockedSites">__MSG_BlackListStr__</label>
+            <textarea id="blockedSites" rows="7" placeholder="__MSG_blockedSitesPlaceholderDes__"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 配置云同步 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">☁️</span>__MSG_configCloudSync__</label>
+        <div class="row-content">
+          <button type="button" class="btn btn-primary" id="upload">☁️⬆ __MSG_upload__</button>
+          <button type="button" class="btn btn-primary" id="download">☁️⬇ __MSG_download__</button>
+          <em>(__MSG_configCloudSyncDes__)</em>
+          <span class="alert" id="sync-result"></span>
+        </div>
+      </div>
+
+      <!-- 配置导入导出 -->
+      <div class="form-row">
+        <label class="row-label"><span class="row-icon">📤</span>__MSG_configImportExportStr__</label>
+        <div class="row-content">
+          <button type="button" class="btn btn-success" id="importConfig">📥 __MSG_importConfig__</button>
+          <button type="button" class="btn btn-secondary" id="exportConfig">📤 __MSG_exportConfig__</button>
+          <em>(__MSG_configImportExportDes__)</em>
+          <input type="file" id="configFileInput" accept=".json" style="display: none;" />
+          <span class="alert" id="import-export-result"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div id="colorMode" class="clickable" title="__MSG_ColorMode__">🌗</div>
+        <span id="copyright">
+          <a target="_blank" href="https://github.com/Mrcoolfuyu/">__MSG_copyright__</a>
+        </span>
+        <span class="text-center">
+          <button type="submit" class="btn btn-success" id="save">✔️ __MSG_Save__</button>
+          <button type="reset" class="btn btn-warning" id="reset">❌ __MSG_Reset__</button>
+        </span>
+        <span class="text-right" id="acknowledgment">
+          <a href="acknowledgment.txt">💡 __MSG_Acknowledgment__</a>
+        </span>
+      </div>
+    </footer>
+  </form>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="options.js"></script>
+</body>
+
+</html>

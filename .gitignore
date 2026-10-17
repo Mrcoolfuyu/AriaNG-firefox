@@ -1,0 +1,9 @@
+# build artifacts
+*.xpi
+*.zip
+web-ext-artifacts/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log

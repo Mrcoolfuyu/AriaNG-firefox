@@ -1,0 +1,19 @@
+AriaNG Firefox Extension - Acknowledgment
+==========================================
+
+本项目基于以下开源项目构建，在此致谢：
+
+1. AriaNg (https://github.com/mayswind/AriaNg)
+   - MIT License
+   - 本扩展内置的 AriaNG 前端界面来自 AriaNg 1.3.15 AllInOne 发行版。
+   - 其内联脚本已抽取至 ui/ariang/js/ 目录以便符合扩展 CSP 要求。
+
+2. Aria2-Explorer (https://github.com/alexhua/Aria2-Explorer)
+   - 本扩展 v1.0 的功能设计完全参照该项目（Chrome 扩展）。
+   - 代码针对 Firefox WebExtensions API 重新实现，未照搬其 Chrome 专有 API。
+
+3. aria2 (https://github.com/aria2/aria2)
+   - 本扩展通过 JSON-RPC 与 aria2 通信，不包含 aria2 本体。
+
+4. AngularJS / jQuery / Bootstrap / moment.js / ECharts 等第三方库
+   - 均随 AriaNg AllInOne 发行版内嵌，遵循各自的开源许可证。

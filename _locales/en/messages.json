@@ -1,0 +1,341 @@
+{
+  "appName": {
+    "message": "AriaNG"
+  },
+  "description": {
+    "message": "Let Aria2 seamlessly take over downloads, with the AriaNG frontend built in."
+  },
+  "configPageTitle": {
+    "message": "AriaNG Extension Settings"
+  },
+  "contextmenuTitle": {
+    "message": "Export to "
+  },
+  "contextmenuStr": {
+    "message": "Context Menu"
+  },
+  "contextmenuDes": {
+    "message": "Export downloads via context menu"
+  },
+  "exportAllDes": {
+    "message": "Export all links"
+  },
+  "exportAllFailedDes": {
+    "message": "No valid download links found."
+  },
+  "checkAltClickDes": {
+    "message": "Hold Alt key to skip capture"
+  },
+  "checkAltClickTip": {
+    "message": "Alt-click a link to download it without interception. Reload pages after changing this setting."
+  },
+  "askBeforeExportDes": {
+    "message": "Ask for detailed parameters before exporting"
+  },
+  "downloadCaptureStr": {
+    "message": "Download Capture"
+  },
+  "downloadCaptureDes": {
+    "message": "Auto-capture downloads to Aria2 when file size is"
+  },
+  "askBeforeDownloadDes": {
+    "message": "Ask for parameters before auto-download"
+  },
+  "allowExternalRequestDes": {
+    "message": "Accept Aria2 download requests from other extensions"
+  },
+  "monitorAria2Str": {
+    "message": "Monitor Aria2 Status"
+  },
+  "monitorAria2Des": {
+    "message": "Monitor Aria2 download status"
+  },
+  "monitorAllDes": {
+    "message": "Monitor all Aria2 servers"
+  },
+  "monitorAllTip": {
+    "message": "When multiple Aria2 servers are configured, monitor all of them and aggregate the results."
+  },
+  "badgeTextDes": {
+    "message": "Show task count on the icon"
+  },
+  "allowNotificationDes": {
+    "message": "Task status notifications"
+  },
+  "keepSilentDes": {
+    "message": "Keep notifications silent"
+  },
+  "captureMagnetDes": {
+    "message": "Capture magnet links"
+  },
+  "captureMagnetWarn": {
+    "message": "System-level capture, make sure to disable before uninstalling"
+  },
+  "websiteStr": {
+    "message": "Websites"
+  },
+  "websiteFilterStr": {
+    "message": "Website Filter"
+  },
+  "selectDefaultRpcStr": {
+    "message": "Default Aria2"
+  },
+  "fileExtStr": {
+    "message": "File Extensions"
+  },
+  "whiteListStr": {
+    "message": "Whitelist"
+  },
+  "BlackListStr": {
+    "message": "Blacklist"
+  },
+  "addToWhiteListStr": {
+    "message": "Current site -> Whitelist"
+  },
+  "addToBlackListStr": {
+    "message": "Current site -> Blacklist"
+  },
+  "exportFailedStr": {
+    "message": "Export Failed"
+  },
+  "exportFailedDes": {
+    "message": "$rpcName$ failed to start the download!",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2 RPC name."
+      }
+    }
+  },
+  "exportSucceedStr": {
+    "message": "Export Succeeded"
+  },
+  "exportSucceedDes": {
+    "message": "$rpcName$ has started the download.",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2 RPC name."
+      }
+    }
+  },
+  "taskNotification": {
+    "message": "Task Notification"
+  },
+  "downloadStart": {
+    "message": "$rpcName$ download started",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2"
+      }
+    }
+  },
+  "downloadComplete": {
+    "message": "$rpcName$ download complete",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2"
+      }
+    }
+  },
+  "seedingOver": {
+    "message": "$rpcName$ seeding over",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2"
+      }
+    }
+  },
+  "downloadError": {
+    "message": "$rpcName$ download error",
+    "placeholders": {
+      "rpcName": {
+        "content": "$1",
+        "example": "Aria2"
+      }
+    }
+  },
+  "allowedSitesPlaceholderDes": {
+    "message": "Domains or extension IDs to capture, one per line, regex supported. (Whitelist first)"
+  },
+  "blockedSitesPlaceholderDes": {
+    "message": "Domains or extension IDs not to capture, one per line, regex supported, * means all."
+  },
+  "allowedExtsPlaceholderDes": {
+    "message": "File types to capture or export,\none extension per line, * means all.\n(Whitelist first)"
+  },
+  "blockedExtsPlaceholderDes": {
+    "message": "File types not to capture or export,\none extension per line, * means all."
+  },
+  "IconOffStyleStr": {
+    "message": "Capture-off Icon"
+  },
+  "iconStyleDefault": {
+    "message": "Default"
+  },
+  "iconStyleDark": {
+    "message": "Dark"
+  },
+  "iconStyleDusk": {
+    "message": "Dusk"
+  },
+  "iconStyleGrey": {
+    "message": "Grey"
+  },
+  "WebUIOpenStyleStr": {
+    "message": "AriaNG Open Style"
+  },
+  "WebUIOpenStyle1": {
+    "message": "Popup"
+  },
+  "WebUIOpenStyle2": {
+    "message": "New tab"
+  },
+  "WebUIOpenStyle3": {
+    "message": "New window"
+  },
+  "WebUIOpenStyle4": {
+    "message": "Sidebar"
+  },
+  "sidebarUnsupportedTip": {
+    "message": "This Firefox version does not support the sidebar API (Firefox 131+ required)"
+  },
+  "popupFallbackTip": {
+    "message": "Firefox cannot open the popup programmatically; opened in a new tab instead"
+  },
+  "openWebUIStr": {
+    "message": "Open AriaNG"
+  },
+  "toggleCapture": {
+    "message": "Toggle download auto-capture"
+  },
+  "configCloudSync": {
+    "message": "Config Cloud Sync"
+  },
+  "configCloudSyncDes": {
+    "message": "Sync AriaNG and extension settings to the current browser account"
+  },
+  "uploadConfigWarn": {
+    "message": "Local config is empty or invalid. Continue anyway?"
+  },
+  "uploadConfigSucceed": {
+    "message": "Config uploaded"
+  },
+  "uploadConfigFailed": {
+    "message": "Config upload failed: "
+  },
+  "downloadConfigSucceed": {
+    "message": "Config downloaded"
+  },
+  "downloadConfigFailed": {
+    "message": "Config download failed: cloud data invalid or network unreachable"
+  },
+  "download": {
+    "message": "Download"
+  },
+  "upload": {
+    "message": "Upload"
+  },
+  "wait": {
+    "message": "Waiting"
+  },
+  "finish": {
+    "message": "Finished"
+  },
+  "connected": {
+    "message": "Connected"
+  },
+  "disconnected": {
+    "message": "Disconnected"
+  },
+  "Save": {
+    "message": "Save"
+  },
+  "Reset": {
+    "message": "Reset"
+  },
+  "Acknowledgment": {
+    "message": "Acknowledgment"
+  },
+  "OverwriteAriaNgRpcWarn": {
+    "message": "RPC settings changed. Sync to AriaNG and overwrite?"
+  },
+  "RpcUrlTooltipWarnDes": {
+    "message": "Creating download tasks over insecure HTTP/WebSocket may expose your secret key and website cookies to the public network."
+  },
+  "AutoDownloadCookiesTooltipDes": {
+    "message": "With an insecure RPC protocol, website cookies will not be attached during auto-download and context-menu export."
+  },
+  "ManualDownloadCookiesTooltipDes": {
+    "message": "When asked for download settings, you need to decide whether to remove the website cookies."
+  },
+  "ClearSettingsDes": {
+    "message": "Clear all settings?"
+  },
+  "ColorMode": {
+    "message": "Color mode"
+  },
+  "lightMode": {
+    "message": "Light mode"
+  },
+  "darkMode": {
+    "message": "Dark mode"
+  },
+  "followSystem": {
+    "message": "Follow system"
+  },
+  "Name": {
+    "message": "Name"
+  },
+  "SecretKey": {
+    "message": "Secret Key"
+  },
+  "downloadLocation": {
+    "message": "Download Dir"
+  },
+  "Mark": {
+    "message": "Mark"
+  },
+  "MarkAsSecureTip": {
+    "message": "Mark RPC protocol as secure"
+  },
+  "MarkAsInsecureTip": {
+    "message": "Mark RPC protocol as insecure"
+  },
+  "exportConfig": {
+    "message": "Export Config"
+  },
+  "importConfig": {
+    "message": "Import Config"
+  },
+  "exportConfigSuccess": {
+    "message": "Config exported"
+  },
+  "importConfigSuccess": {
+    "message": "Config imported"
+  },
+  "importConfigFailed": {
+    "message": "Config import failed"
+  },
+  "importConfigConfirm": {
+    "message": "Import config? This will overwrite all current settings."
+  },
+  "configImportExportStr": {
+    "message": "Config Import/Export"
+  },
+  "configImportExportDes": {
+    "message": "Backup and restore extension settings"
+  },
+  "fileSizeUnitMB": {
+    "message": "MB"
+  },
+  "fileSizeUnitGB": {
+    "message": "GB"
+  },
+  "copyright": {
+    "message": "© 2026 Mr.cool"
+  }
+}
