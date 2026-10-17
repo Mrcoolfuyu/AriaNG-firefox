@@ -74,10 +74,14 @@ Firefox-specific notes (differences from the Chrome original)
   signed-in Firefox Account with sync enabled; without one the data only stays local.
 * When an export to aria2 fails, the file is re-downloaded through the browser so that
   nothing is lost (the Chrome original only does this for localhost RPC servers).
-* Embedded AriaNG patch: the task-list "新建" link uses a plain `href="#!/new"` instead
-  of `ng-href`. AngularJS' `aHrefSanitizationWhitelist` only allows http/https/ftp/...,
-  so under `moz-extension://` it rewrote the link to `unsafe:moz-extension://...` and
-  Firefox refused to open it. Re-apply after upgrading the AriaNG bundle.
+* Embedded AriaNG patch: `ui/ariang/js/extension-patch.js` is loaded after the last
+  AriaNG bundle and widens AngularJS' `aHrefSanitizationWhitelist` with
+  `moz-extension:` / `chrome-extension:`. AngularJS only allows http/https/ftp/... by
+  default, so every `ng-href` hash route ("新建" in the toolbar, the per-task detail
+  arrow in the list) was rewritten to `unsafe:moz-extension://...` and Firefox refused
+  to open it. The patch also hides the RPC switcher when only one server is configured.
+  **Re-check this patch after upgrading the AriaNG bundle** - if the bundle stops being
+  the last `<script>`, the routes silently break again.
 
 Install (for development / sideload)
 -----------------------------------
@@ -178,7 +182,7 @@ popup/                 toolbar popup embedding the AriaNG UI
 options/               options page (vanilla JS/CSS)
 ui/ariang/             AriaNg 1.3.15 AllInOne build (inline scripts extracted to js/)
 tools/build_xpi.py     stdlib-only script that packages build/ariang-<version>.xpi
-images/                toolbar / action icons (4 styles)
+images/                toolbar / action icons (product blue arrow + blue/green/gray variants)
 _locales/              zh_CN (default) and en messages
 ```
 
