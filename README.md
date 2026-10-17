@@ -73,7 +73,32 @@ Install (for development / sideload)
 3. Open the extension options and configure your aria2 RPC server, e.g.
    `ws://192.168.50.100:6800/jsonrpc` with your secret key.
 
-Build a signed/unsigned XPI with:
+Install the packaged XPI (permanent, unsigned)
+----------------------------------------------
+
+A pre-built unsigned XPI lives in `build/ariang-1.0.0.xpi`. An XPI is a plain zip
+whose root contains `manifest.json`.
+
+* Firefox Developer Edition / Nightly accept unsigned add-ons by default.
+* On Release/Beta, either set `xpinstall.signatures.required` to `false` in
+  `about:config` first, or install a signed build (see below).
+* Install by dragging the `.xpi` onto a Firefox window, or via
+  `File` -> `Open File...`, and confirm the prompt. Unlike the temporary load
+  above, this install survives restarts.
+
+For a publicly distributed build, submit the package to AMO for signing:
+
+```sh
+npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
+```
+
+Build the unsigned XPI locally with:
+
+```sh
+python tools/build_xpi.py     # writes build/ariang-1.0.0.xpi
+```
+
+or with web-ext:
 
 ```sh
 npx web-ext build
@@ -113,6 +138,7 @@ js/content/            content scripts (magnet capture, export all links)
 popup/                 toolbar popup embedding the AriaNG UI
 options/               options page (vanilla JS/CSS)
 ui/ariang/             AriaNg 1.3.15 AllInOne build (inline scripts extracted to js/)
+tools/build_xpi.py     stdlib-only script that packages build/ariang-<version>.xpi
 images/                toolbar / action icons (4 styles)
 _locales/              zh_CN (default) and en messages
 ```
