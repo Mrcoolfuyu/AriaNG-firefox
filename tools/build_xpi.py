@@ -17,8 +17,12 @@ import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-SKIP_DIRS = {'.git', '__pycache__', 'node_modules'}
-SKIP_FILES = {'.DS_Store', 'Thumbs.db'}
+# Never ship development-only material. `tools/` matters for more than tidiness:
+# addons.mozilla.org flags *.py entries as "flagged file type found" (a file type
+# that can identify a binary component), which pulls the submission into manual
+# binary-content review for no reason.
+SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'tools', '.workbuddy'}
+SKIP_FILES = {'.DS_Store', 'Thumbs.db', '.gitignore', '.gitattributes'}
 
 
 def find_source():

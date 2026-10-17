@@ -1,19 +1,89 @@
-AriaNG Firefox Extension - Acknowledgment
-==========================================
+AriaNG Firefox Extension - Third-party notices
+==============================================
 
-本项目基于以下开源项目构建，在此致谢：
+This add-on embeds the AriaNg web frontend (MIT) unchanged except for the CSP /
+link-sanitisation patch described below. Every JavaScript file under
+`ui/ariang/js/` is a **vendored, unmodified** build artefact of the upstream
+AriaNg "AllInOne" release (AriaNg 1.3.15); the extension itself does not contain
+minified or obfuscated code of its own. The extension's own sources
+(`js/`, `options/`, `popup/`) ship as readable, non-minified code.
 
-1. AriaNg (https://github.com/mayswind/AriaNg)
-   - MIT License
-   - 本扩展内置的 AriaNG 前端界面来自 AriaNg 1.3.15 AllInOne 发行版。
-   - 其内联脚本已抽取至 ui/ariang/js/ 目录以便符合扩展 CSP 要求。
+1. AriaNg 1.3.15 - https://github.com/mayswind/AriaNg
+   MIT License. Bundled frontend under `ui/ariang/` (see `ui/ariang/LICENSE`).
+   Upstream ships the whole UI as one inline <script>; it has been split into
+   `ui/arianng-inline-1..8.js` purely so it satisfies the Manifest V2 content
+   security policy (no inline script). `ui/ariang/js/extension-patch.js` is the
+   only file added by this extension; it widens AngularJS' `$compileProvider`
+   `aHrefSanitizationWhitelist` by the `moz-extension:` / `chrome-extension:`
+   schemes, without which every hash-route `ng-href` inside an extension page is
+   rewritten to `unsafe:moz-extension://...` and cannot be opened.
 
-2. Aria2-Explorer (https://github.com/alexhua/Aria2-Explorer)
-   - 本扩展 v1.0 的功能设计完全参照该项目（Chrome 扩展）。
-   - 代码针对 Firefox WebExtensions API 重新实现，未照搬其 Chrome 专有 API。
+2. Aria2-Explorer - https://github.com/alexhua/Aria2-Explorer
+   The feature design of v1.0 follows this Chrome extension. The code was
+   re-implemented against the Firefox WebExtensions API; no Chrome-only API
+   (e.g. `chrome.downloads.onDeterminingFilename`) is used.
 
-3. aria2 (https://github.com/aria2/aria2)
-   - 本扩展通过 JSON-RPC 与 aria2 通信，不包含 aria2 本体。
+3. aria2 - https://github.com/aria2/aria2
+   Not bundled. The extension only talks to aria2 over its JSON-RPC interface.
 
-4. AngularJS / jQuery / Bootstrap / moment.js / ECharts 等第三方库
-   - 均随 AriaNg AllInOne 发行版内嵌，遵循各自的开源许可证。
+4. Third-party libraries inside the AriaNg bundles
+   ---------------------------------------------------------------------------
+   bundle              library (version)                     license
+   arianng-inline-1    jQuery 3.4.1                            MIT
+   arianng-inline-2    AngularJS 1.6.10                        MIT
+   arianng-inline-3    Bootstrap 3.4.1                         MIT
+   arianng-inline-4    moment.js 2.29.4                        MIT
+   arianng-inline-5    ECharts 3.7.4                           Apache-2.0
+   arianng-inline-6    AdminLTE 2 (app.js), SweetAlert 1.x,    MIT
+                       angular-translate 2.19.0
+   arianng-inline-7/8  AriaNg application code + AngularJS
+                       modules (ui-router, ariaNg services)    MIT
+
+About the addons.mozilla.org linter warnings
+--------------------------------------------
+`addons-linter` reports, for this package: **0 errors, 24 warnings, 0 notices**.
+All 24 warnings come from the vendored libraries listed above, none from the
+extension's own code:
+
+  file               count  what the linter flags
+  -----------------  -----  ------------------------------------------------
+  arianng-inline-1      3   jQuery: `.html()` / `domManip()` assign innerHTML
+  arianng-inline-2      7   AngularJS: jqLite `.html()`, `$compile` attribute
+                            parsing, and two `new Function` sites (the CSP
+                            probe and the `$parse` compiler)
+  arianng-inline-3      1   Bootstrap 3: its tooltip/popover sanitizer builds a
+                            detached document and assigns `body.innerHTML`
+  arianng-inline-5      7   ECharts 3.7.4: tooltip `setContent`, data-view
+                            widgets, the "save as image" `document.write` path
+                            and a `new Function` fallback for JSON.parse
+  arianng-inline-6      6   SweetAlert / AdminLTE: dialog title and body are set
+                            with `innerHTML` after `escapeHtml()` has been
+                            applied to the user-supplied value
+
+Why these are not exploitable here:
+
+  * The add-on's content security policy is
+    `script-src 'self'; object-src 'self'; frame-src 'self'` - there is **no
+    `unsafe-eval`**, and a Manifest V2 add-on cannot request one. AngularJS
+    probes for eval support while bootstrapping and, when it is unavailable,
+    falls back to its AST interpreter instead of the `new Function` compiler -
+    which is why the UI still works. The end-to-end suite asserts that the page
+    CSP really is enforced (an injected inline <script> never executes) while
+    expressions are still evaluated.
+  * All `innerHTML` assignments happen inside an extension page
+    (`moz-extension://<uuid>/ui/ariang/`) whose only data source is the user's
+    own aria2 JSON-RPC endpoint. Task names and URLs are rendered through
+    AngularJS interpolation (text nodes, not HTML) in the add-on's own code.
+  * `document.write` in ECharts is only reachable from the chart "save as image"
+    action, writing an `<img>` tag with an extension-owned data URL; it never
+    receives remote input.
+
+中文说明
+--------
+本扩展内置 AriaNg 1.3.15 前端（MIT），`ui/ariang/js/` 下全部为上游 AllInOne
+发行版原样拆分产物（为满足 CSP 而拆成 8 个文件），扩展自身代码（js/、options/、
+popup/）均为可读、不压缩的源码。AMO 检查报告 0 错误 / 24 警告，警告全部来自
+jQuery、AngularJS、Bootstrap、ECharts、SweetAlert 等第三方库，与扩展代码无关。
+扩展 CSP 为 `script-src 'self'`（MV2 不允许 `unsafe-eval`），AngularJS 启动时
+探测到 eval 不可用会改用 AST 解释器，因此报告中的 `new Function` 调用在页面
+世界里不会执行；内联脚本被 CSP 拦截一节由端到端测试断言。

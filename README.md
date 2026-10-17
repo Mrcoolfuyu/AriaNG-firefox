@@ -91,7 +91,7 @@ Install (for development / sideload)
 Install the packaged XPI (permanent, unsigned)
 ----------------------------------------------
 
-A pre-built unsigned XPI lives in `build/ariang-1.4.0.xpi`. An XPI is a plain zip
+A pre-built unsigned XPI lives in `build/ariang-1.5.0.xpi`. An XPI is a plain zip
 whose root contains `manifest.json`.
 
 * Firefox Developer Edition / Nightly accept unsigned add-ons by default.
@@ -110,7 +110,7 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
 Build the unsigned XPI locally with:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.4.0.xpi
+python tools/build_xpi.py     # writes build/ariang-1.5.0.xpi
 ```
 
 or with web-ext:
@@ -124,6 +124,30 @@ Lint with:
 ```sh
 npx web-ext lint
 ```
+
+Or the linter AMO itself runs, against the built package:
+
+```sh
+npx addons-linter build/ariang-<version>.xpi
+```
+
+addons.mozilla.org report (v1.5.0): **0 errors, 24 warnings, 0 notices**. Every
+warning comes from the vendored AriaNg frontend libraries (jQuery, AngularJS,
+Bootstrap, ECharts, SweetAlert) - none from this add-on's own code. Nothing in
+that list blocks signing; `acknowledgment.txt` (shipped inside the XPI) maps each
+warning to the library that produces it and explains why it is not exploitable
+here, so it can be quoted in the submission notes.
+
+Two linter findings were fixed in v1.5.0 and should not be reintroduced:
+
+* `KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION` -
+  `data_collection_permissions` needs Firefox for Android 142, so the manifest now
+  carries an explicit `browser_specific_settings.gecko_android.strict_min_version`.
+  Desktop stays at 141.
+* `FLAGGED_FILE_TYPE` on `tools/build_xpi.py` - the packaging script is
+  development-only and is excluded from the XPI (`SKIP_DIRS` in
+  `tools/build_xpi.py`). Anything else development-only (`tools/`, `.gitignore`,
+  `.gitattributes`) is excluded too.
 
 RPC configuration
 -----------------

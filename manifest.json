@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "AriaNG",
   "short_name": "AriaNG",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "default_locale": "zh_CN",
   "description": "__MSG_description__",
   "author": "Mr.cool",
@@ -75,6 +75,9 @@
         ],
         "optional": []
       }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
     }
   },
   "content_security_policy": "script-src 'self'; object-src 'self'; frame-src 'self'"
