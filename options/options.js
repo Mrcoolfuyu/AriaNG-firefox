@@ -40,7 +40,10 @@
 
       const styleRadio = document.querySelector('input[name=webUIOpenStyle][value="' + configs.webUIOpenStyle + '"]');
       if (styleRadio) styleRadio.checked = true;
-      const iconRadio = document.querySelector('input[name=iconOffStyle][value="' + configs.iconOffStyle + '"]');
+      /* normalise first: v1.2.x stored Default/Dark/Dusk/Grey, which no longer exist */
+      const iconOffStyle = A2E.normalizeIconOffStyle(configs.iconOffStyle);
+      Configs.iconOffStyle = iconOffStyle;
+      const iconRadio = document.querySelector('input[name=iconOffStyle][value="' + iconOffStyle + '"]');
       if (iconRadio) iconRadio.checked = true;
       const unitSelect = document.getElementById('fileSizeUnit');
       if (unitSelect) unitSelect.value = configs.fileSizeUnit || 'MB';
@@ -273,11 +276,21 @@
     notifyResult: function (elementId, message, style, timeout = 2000) {
       const el = document.getElementById(elementId);
       if (!el) return;
+      /*
+       * Cancel the pending clear-timer of the previous message: otherwise a
+       * quick second action (e.g. export then import) has its message wiped by
+       * the stale timer a moment later.
+       */
+      if (notifyTimers[elementId]) {
+        clearTimeout(notifyTimers[elementId]);
+        delete notifyTimers[elementId];
+      }
       el.classList.add(style);
       el.textContent = message;
-      setTimeout(() => {
+      notifyTimers[elementId] = setTimeout(() => {
         el.textContent = '';
         el.classList.remove(style);
+        delete notifyTimers[elementId];
       }, timeout);
     },
 
@@ -535,6 +548,8 @@
   let saving = false;
   /* identity of the last imported config file - see handleConfigImport */
   let lastImportStamp = '';
+  /* pending clear-timers of result messages, keyed by element id */
+  const notifyTimers = {};
 
   window.addEventListener('DOMContentLoaded', Configs.init);
   if (window.matchMedia) {

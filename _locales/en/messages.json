@@ -173,17 +173,14 @@
   "IconOffStyleStr": {
     "message": "Capture-off Icon"
   },
-  "iconStyleDefault": {
-    "message": "Default"
+  "iconStyleGray": {
+    "message": "Gray"
   },
-  "iconStyleDark": {
-    "message": "Dark"
+  "iconStyleGreen": {
+    "message": "Green"
   },
-  "iconStyleDusk": {
-    "message": "Dusk"
-  },
-  "iconStyleGrey": {
-    "message": "Grey"
+  "iconStyleBlue": {
+    "message": "Blue"
   },
   "WebUIOpenStyleStr": {
     "message": "AriaNG Open Style"
@@ -245,9 +242,6 @@
   "Reset": {
     "message": "Reset"
   },
-  "Acknowledgment": {
-    "message": "Acknowledgment"
-  },
   "OverwriteAriaNgRpcWarn": {
     "message": "RPC settings changed. Sync to AriaNG and overwrite?"
   },
@@ -288,10 +282,10 @@
     "message": "Mark"
   },
   "MarkAsSecureTip": {
-    "message": "Mark RPC protocol as secure"
+    "message": "Not marked: browser cookies are not forwarded to a plaintext RPC (not localhost / not https). Click to mark"
   },
   "MarkAsInsecureTip": {
-    "message": "Mark RPC protocol as insecure"
+    "message": "Marked as a trusted plaintext RPC: browser cookies are forwarded. Click to unmark"
   },
   "exportConfig": {
     "message": "Export Config"

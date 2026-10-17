@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" role="img" aria-label="AriaNG download">
+  <!-- AriaNG addon icon - 32x32 grid, stroke 3, round caps/joins -->
+  <g stroke="#6B7280" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 4.5V17"/>
+    <path d="M9.5 10.5 16 17l6.5-6.5"/>
+    <path d="M4.5 22.5V27h23v-4.5"/>
+  </g>
+</svg>

@@ -41,10 +41,15 @@ Features
   * Desktop notifications on task events (start / complete / error), optionally silent.
   * Supports multiple RPC servers, with per-server URL patterns and a default server.
 * AriaNG UI
-  * Full AriaNG 1.3.15 frontend embedded in the popup, sidebar, tab or window.
+  * Full AriaNG 1.3.15 frontend embedded in a popup window or a new tab.
   * The extension keeps AriaNG's RPC configuration in sync with the extension settings.
+* Icons
+  * Product icon: blue download arrow (`images/ariang-blue.svg`, rasterised to
+    16/32/48/64/128 PNG).
+  * While capture is turned off the toolbar icon uses the colour picked in
+    "拦截关闭状态图标" (gray / green / blue).
 * Options page
-  * All of the above plus: capture-off icon style, config cloud sync (browser sync storage),
+  * All of the above plus: capture-off icon colour, config cloud sync (browser sync storage),
     config import/export (JSON file), light/dark/system color mode.
 
 Firefox-specific notes (differences from the Chrome original)
@@ -69,6 +74,10 @@ Firefox-specific notes (differences from the Chrome original)
   signed-in Firefox Account with sync enabled; without one the data only stays local.
 * When an export to aria2 fails, the file is re-downloaded through the browser so that
   nothing is lost (the Chrome original only does this for localhost RPC servers).
+* Embedded AriaNG patch: the task-list "新建" link uses a plain `href="#!/new"` instead
+  of `ng-href`. AngularJS' `aHrefSanitizationWhitelist` only allows http/https/ftp/...,
+  so under `moz-extension://` it rewrote the link to `unsafe:moz-extension://...` and
+  Firefox refused to open it. Re-apply after upgrading the AriaNG bundle.
 
 Install (for development / sideload)
 -----------------------------------
@@ -82,7 +91,7 @@ Install (for development / sideload)
 Install the packaged XPI (permanent, unsigned)
 ----------------------------------------------
 
-A pre-built unsigned XPI lives in `build/ariang-1.2.0.xpi`. An XPI is a plain zip
+A pre-built unsigned XPI lives in `build/ariang-1.3.0.xpi`. An XPI is a plain zip
 whose root contains `manifest.json`.
 
 * Firefox Developer Edition / Nightly accept unsigned add-ons by default.
@@ -101,7 +110,7 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
 Build the unsigned XPI locally with:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.2.0.xpi
+python tools/build_xpi.py     # writes build/ariang-1.3.0.xpi
 ```
 
 or with web-ext:

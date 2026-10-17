@@ -134,14 +134,19 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
   /* icons                                                              */
   /* ------------------------------------------------------------------ */
 
+  /*
+   * The product icon is the blue download arrow (logo<size>.png); the other
+   * colours live next to it as logo<size>-<colour>.png.
+   */
   function iconPathFor(style, size) {
-    if (!style || style === 'Default') return 'images/logo' + size + '.png';
-    return 'images/logo' + size + '-' + style.toLowerCase() + '.png';
+    const colour = String(style || 'Blue').toLowerCase();
+    if (!colour || colour === 'blue' || colour === 'default') return 'images/logo' + size + '.png';
+    return 'images/logo' + size + '-' + colour + '.png';
   }
 
   function refreshActionIcon() {
     const integration = getConfig('integration');
-    const style = integration ? 'Default' : (getConfig('iconOffStyle') || 'Dusk');
+    const style = integration ? 'Blue' : A2E.normalizeIconOffStyle(getConfig('iconOffStyle'));
     const path = {
       16: iconPathFor(style, 16),
       32: iconPathFor(style, 32),

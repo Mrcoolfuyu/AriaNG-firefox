@@ -171,19 +171,16 @@
     "message": "设置不需要拦截或导出的文件类型，\n每行一个扩展名，* 代表所有。"
   },
   "IconOffStyleStr": {
-    "message": "拦截状态图标"
+    "message": "拦截关闭状态图标"
   },
-  "iconStyleDefault": {
-    "message": "默认"
-  },
-  "iconStyleDark": {
-    "message": "深色"
-  },
-  "iconStyleDusk": {
-    "message": "黄昏"
-  },
-  "iconStyleGrey": {
+  "iconStyleGray": {
     "message": "灰色"
+  },
+  "iconStyleGreen": {
+    "message": "绿色"
+  },
+  "iconStyleBlue": {
+    "message": "蓝色"
   },
   "WebUIOpenStyleStr": {
     "message": "AriaNG打开方式"
@@ -245,9 +242,6 @@
   "Reset": {
     "message": "重置"
   },
-  "Acknowledgment": {
-    "message": "致谢"
-  },
   "OverwriteAriaNgRpcWarn": {
     "message": "RPC设置已更改，同步到AriaNG并覆盖？"
   },
@@ -288,10 +282,10 @@
     "message": "标记"
   },
   "MarkAsSecureTip": {
-    "message": "标记为安全的RPC协议"
+    "message": "未标记：不向明文 RPC（非 localhost / 非 https）转发浏览器 Cookie。点击可标记"
   },
   "MarkAsInsecureTip": {
-    "message": "标记为不安全的RPC协议"
+    "message": "已标记为可信明文 RPC：下载时会转发浏览器 Cookie。点击取消标记"
   },
   "exportConfig": {
     "message": "导出配置"

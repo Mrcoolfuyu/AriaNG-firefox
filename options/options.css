@@ -393,16 +393,6 @@ textarea {
   color: var(--accent);
 }
 
-#acknowledgment a {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 13px;
-}
-
-#acknowledgment a:hover {
-  color: var(--accent);
-}
-
 .text-center {
   display: flex;
   gap: 12px;
