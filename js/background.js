@@ -98,15 +98,36 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
   /* ariaNG options sync (extension origin localStorage)                */
   /* ------------------------------------------------------------------ */
 
-  function syncAriaNgOptions() {
+  /*
+   * Reconcile the extension rpcList with AriaNG's own options object.
+   * AriaNG-side edits (made inside the AriaNG UI) are adopted back into the
+   * extension config instead of being overwritten by defaults - see
+   * A2E.Utils.reconcileRpcConfig.
+   */
+  async function syncAriaNgOptions() {
+    let stored = {};
     try {
-      let options = {};
-      const raw = localStorage.getItem(A2E.ARIA_NG_OPTIONS_KEY);
-      if (raw) options = JSON.parse(raw);
-      const merged = A2E.Utils.exportRpcToAriaNg(getConfig('rpcList'), options);
-      localStorage.setItem(A2E.ARIA_NG_OPTIONS_KEY, JSON.stringify(merged));
+      stored = await browser.storage.local.get(['rpcList', 'rpcListPushed']);
+    } catch (error) {
+      console.warn('[AriaNG] syncAriaNgOptions: load configs failed', error);
+      return;
+    }
+    let result = null;
+    try {
+      result = A2E.Utils.reconcileRpcConfig(stored.rpcList, stored.rpcListPushed);
     } catch (error) {
       console.warn('[AriaNG] syncAriaNgOptions failed:', error);
+      return;
+    }
+    const update = {};
+    if (result.rpcList) update.rpcList = result.rpcList;
+    if (result.pushed) update.rpcListPushed = result.pushed;
+    if (Object.keys(update).length > 0) {
+      try {
+        await browser.storage.local.set(update);
+      } catch (error) {
+        console.warn('[AriaNG] syncAriaNgOptions: save failed', error);
+      }
     }
   }
 
@@ -622,22 +643,25 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
     }
 
     if (openStyle === 'popup') {
+      /*
+       * Open the AriaNG UI in a real popup window (movable / resizable).
+       * The anchored browserAction popup is never used - it is pinned to the
+       * toolbar and cannot be moved.
+       */
       const popupUrl = browser.runtime.getURL('popup/popup.html');
-      const canOpenPopup = typeof browser.browserAction.openPopup === 'function';
-      if (canOpenPopup) {
-        try {
-          if (webUiUrl !== index) {
-            await browser.browserAction.setPopup({ popup: popupUrl + '#' + webUiUrl.substring(index.length) });
-          }
-          await browser.browserAction.openPopup();
-          await browser.browserAction.setPopup({ popup: popupUrl });
-          return;
-        } catch (error) {
-          console.warn('[AriaNG] openPopup failed, fallback to tab:', error);
-          try { await browser.browserAction.setPopup({ popup: popupUrl }); } catch (e) { /* ignore */ }
-        }
-      } else {
-        console.info('[AriaNG] ' + msg('popupFallbackTip'));
+      /* webUiUrl is index + '#!...', so the substring already carries the '#' */
+      const hash = (webUiUrl !== index) ? webUiUrl.substring(index.length) : '';
+      try {
+        await browser.windows.create({
+          type: 'popup',
+          url: popupUrl + hash,
+          width: 800,
+          height: 640,
+          focused: true
+        });
+        return;
+      } catch (error) {
+        console.warn('[AriaNG] create popup window failed, fallback to tab:', error);
       }
       browser.tabs.create({ url: webUiUrl }).catch(() => { });
       return;
@@ -976,12 +1000,18 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
   /* ------------------------------------------------------------------ */
 
   function applyPopupState() {
-    const openStyle = getConfig('webUIOpenStyle');
-    const popup = (openStyle === 'popup') ? browser.runtime.getURL('popup/popup.html') : '';
-    browser.browserAction.setPopup({ popup: popup }).catch((e) => {
-      console.warn('[AriaNG] setPopup failed:', e);
-    });
-    if (openStyle === 'sidebar' && browser.sidebarAction) {
+    /*
+     * Never attach an anchored browserAction popup: it is pinned to the
+     * toolbar and cannot be moved. With no popup attached, left click fires
+     * browserAction.onClicked and the AriaNG UI opens per webUIOpenStyle
+     * (movable popup window / tab / window / sidebar).
+     */
+    try {
+      browser.browserAction.setPopup({ popup: '' }).catch(() => { });
+    } catch (error) {
+      /* some versions reject the empty string - no popup is the default anyway */
+    }
+    if (getConfig('webUIOpenStyle') === 'sidebar' && browser.sidebarAction) {
       browser.sidebarAction.setTitle({ title: 'AriaNG' }).catch(() => { });
     }
   }

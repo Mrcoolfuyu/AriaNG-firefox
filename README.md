@@ -59,8 +59,13 @@ Firefox-specific notes (differences from the Chrome original)
 * The sidebar uses `browser.sidebarAction` (requires Firefox 131+).
 * `chrome.power` (keep system awake) has no Firefox equivalent and was removed.
 * Toolbar icon animations were replaced with static icons + badge text.
-* When the popup open style is selected, Firefox cannot programmatically open the popup
-  (no `browserAction.openPopup` on older versions); such actions fall back to a new tab.
+* The "popup" open style opens a real popup window (`windows.create` with
+  `type: 'popup'`) instead of the anchored `browserAction` popup, so the window can be
+  moved and resized like any other window.
+* RPC configuration lives in two places - the extension storage (options page) and
+  AriaNG's own `AriaNg.Options` localStorage. They are reconciled on every open:
+  edits made inside the AriaNG UI are adopted back into the extension config instead
+  of being overwritten by defaults, and extension-side saves are pushed into AriaNG.
 * When an export to aria2 fails, the file is re-downloaded through the browser so that
   nothing is lost (the Chrome original only does this for localhost RPC servers).
 

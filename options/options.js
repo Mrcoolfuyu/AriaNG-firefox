@@ -196,7 +196,13 @@
 
       saving = true;
       try {
-        await browser.storage.local.set(config);
+        /*
+         * Write AriaNg.Options first, then extension storage: when
+         * storage.onChanged fires, the background sync sees both sides
+         * already in sync (rpcListPushed records what we pushed).
+         */
+        A2E.Utils.pushRpcListToAriaNg(rpcList);
+        await browser.storage.local.set(Object.assign({}, config, { rpcListPushed: rpcList }));
       } finally {
         saving = false;
       }

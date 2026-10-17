@@ -1,34 +1,43 @@
 /*
  * AriaNG Firefox Extension - popup page
- * Syncs the RPC configuration into AriaNG's own localStorage options
+ * Reconciles the RPC configuration with AriaNG's own localStorage options
  * (key "AriaNg.Options") before loading the AriaNG UI in the iframe.
+ * Config edited inside the AriaNG UI is adopted back into the extension
+ * storage instead of being overwritten - see A2E.Utils.reconcileRpcConfig.
  */
 (function () {
   'use strict';
 
   async function syncAriaNgOptions() {
-    let configs = {};
+    let stored = {};
     try {
-      configs = await browser.storage.local.get(null);
+      stored = await browser.storage.local.get(['rpcList', 'rpcListPushed']);
     } catch (error) {
       console.warn('[AriaNG] popup: load configs failed', error);
     }
-    const rpcList = (configs.rpcList && configs.rpcList.length) ? configs.rpcList : A2E.DefaultConfigs.rpcList;
+    let result = null;
     try {
-      let options = {};
-      const raw = localStorage.getItem(A2E.ARIA_NG_OPTIONS_KEY);
-      if (raw) options = JSON.parse(raw);
-      const merged = A2E.Utils.exportRpcToAriaNg(rpcList, options);
-      localStorage.setItem(A2E.ARIA_NG_OPTIONS_KEY, JSON.stringify(merged));
+      result = A2E.Utils.reconcileRpcConfig(stored.rpcList, stored.rpcListPushed);
     } catch (error) {
       console.warn('[AriaNG] popup: sync ariaNg options failed', error);
+      return;
+    }
+    const update = {};
+    if (result.rpcList) update.rpcList = result.rpcList;
+    if (result.pushed) update.rpcListPushed = result.pushed;
+    if (Object.keys(update).length > 0) {
+      try {
+        await browser.storage.local.set(update);
+      } catch (error) {
+        console.warn('[AriaNG] popup: save configs failed', error);
+      }
     }
   }
 
   async function main() {
     await syncAriaNgOptions();
     const element = document.getElementById('AriaNG');
-    /* forward the popup page hash (set via browserAction.setPopup) to the iframe */
+    /* forward the popup page hash (deep links such as #!new?url=...) to the iframe */
     element.src = '../ui/ariang/index.html' + (window.location.hash || '');
   }
 
