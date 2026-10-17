@@ -91,7 +91,7 @@ Install (for development / sideload)
 Install the packaged XPI (permanent, unsigned)
 ----------------------------------------------
 
-A pre-built unsigned XPI lives in `build/ariang-1.3.0.xpi`. An XPI is a plain zip
+A pre-built unsigned XPI lives in `build/ariang-1.4.0.xpi`. An XPI is a plain zip
 whose root contains `manifest.json`.
 
 * Firefox Developer Edition / Nightly accept unsigned add-ons by default.
@@ -110,7 +110,7 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
 Build the unsigned XPI locally with:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.3.0.xpi
+python tools/build_xpi.py     # writes build/ariang-1.4.0.xpi
 ```
 
 or with web-ext:

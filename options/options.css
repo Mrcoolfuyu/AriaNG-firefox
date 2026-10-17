@@ -277,6 +277,16 @@ input.is-warning {
   align-items: center;
 }
 
+/*
+ * Zero the per-item bottom margin inside the picker: with align-items:center
+ * the margin box is what gets centred, so a trailing item without margin sat a
+ * few pixels lower than its neighbours.
+ */
+.icon-picker .radio-item,
+.icon-picker .radio-item:last-child {
+  margin-bottom: 0;
+}
+
 /* ---------- list editor ---------- */
 .list-editor {
   display: flex;
