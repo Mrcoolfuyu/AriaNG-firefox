@@ -1,39 +1,54 @@
 #!/usr/bin/env python3
-"""Build the AriaNG Firefox extension XPI from ariang-firefox/.
+"""Build the AriaNG Firefox extension XPI.
 
 The XPI format is a plain zip whose root contains manifest.json - exactly what
 Firefox expects for a directly installable (sideloaded) add-on package.
+
+Works in both layouts:
+  <workspace>/tools/build_xpi.py  -> packages <workspace>/ariang-firefox/
+  <repo>/tools/build_xpi.py      -> packages <repo>/ itself
+The output XPI always lands in <package-root>/../build/ariang-<version>.xpi,
+i.e. the build/ directory next to the packaged source tree.
 """
 import json
 import os
 import sys
 import zipfile
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # workspace root
-SRC = os.path.join(BASE, 'ariang-firefox')
-OUT_DIR = os.path.join(BASE, 'build')
-VERSION = '1.0.0'
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 SKIP_DIRS = {'.git', '__pycache__', 'node_modules'}
 SKIP_FILES = {'.DS_Store', 'Thumbs.db'}
 
 
+def find_source():
+    """Locate the extension source tree (the dir holding manifest.json)."""
+    parent = os.path.dirname(HERE)
+    for cand in (os.path.join(parent, 'ariang-firefox'), parent):
+        if os.path.isfile(os.path.join(cand, 'manifest.json')):
+            return cand
+    return None
+
+
 def main():
-    manifest = os.path.join(SRC, 'manifest.json')
-    if not os.path.isfile(manifest):
-        print('manifest.json not found in ' + SRC)
+    src = find_source()
+    if not src:
+        print('manifest.json not found next to ' + HERE)
         return 1
-    os.makedirs(OUT_DIR, exist_ok=True)
-    out = os.path.join(OUT_DIR, 'ariang-%s.xpi' % VERSION)
+    with open(os.path.join(src, 'manifest.json'), encoding='utf-8') as f:
+        version = json.load(f)['version']
+    out_dir = os.path.join(os.path.dirname(src), 'build')
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, 'ariang-%s.xpi' % version)
     count = 0
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(SRC):
+        for root, dirs, files in os.walk(src):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for f in files:
                 if f in SKIP_FILES:
                     continue
                 full = os.path.join(root, f)
-                arc = os.path.relpath(full, SRC).replace(os.sep, '/')
+                arc = os.path.relpath(full, src).replace(os.sep, '/')
                 zf.write(full, arc)
                 count += 1
     print('built %s (%d files, %d bytes)' % (out, count, os.path.getsize(out)))

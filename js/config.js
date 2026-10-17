@@ -28,7 +28,7 @@ A2E.DefaultConfigs = {
     { name: "Aria2", url: "http://localhost:6800/jsonrpc", location: "", pattern: "" }
   ],
   /* ariaNG web ui */
-  webUIOpenStyle: "popup",   // popup | tab | window | sidebar
+  webUIOpenStyle: "popup",   // popup | tab
   iconOffStyle: "Dusk",      // Default | Dark | Dusk | Grey
   /* filters */
   allowedSites: [],

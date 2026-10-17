@@ -19,7 +19,7 @@ Features
 --------
 
 * Toolbar icon
-  * Left click: open the embedded AriaNG UI (popup / new tab / new window / sidebar, configurable).
+  * Left click: open the embedded AriaNG UI (popup window / new tab, configurable).
   * Right click: context menu
     * 下载拦截 (toggle auto-capture)
     * 监测Aria2状态 (toggle status monitoring)
@@ -56,7 +56,6 @@ Firefox-specific notes (differences from the Chrome original)
   download to another destination, the browser download is cancelled once the decision
   is made; when the file size is unknown at creation time the extension waits briefly
   for the size to appear and falls back to a HEAD request.
-* The sidebar uses `browser.sidebarAction` (requires Firefox 131+).
 * `chrome.power` (keep system awake) has no Firefox equivalent and was removed.
 * Toolbar icon animations were replaced with static icons + badge text.
 * The "popup" open style opens a real popup window (`windows.create` with
@@ -66,6 +65,8 @@ Firefox-specific notes (differences from the Chrome original)
   AriaNG's own `AriaNg.Options` localStorage. They are reconciled on every open:
   edits made inside the AriaNG UI are adopted back into the extension config instead
   of being overwritten by defaults, and extension-side saves are pushed into AriaNG.
+* Config cloud sync uses `browser.storage.sync` (Firefox Sync): it requires a
+  signed-in Firefox Account with sync enabled; without one the data only stays local.
 * When an export to aria2 fails, the file is re-downloaded through the browser so that
   nothing is lost (the Chrome original only does this for localhost RPC servers).
 
@@ -81,7 +82,7 @@ Install (for development / sideload)
 Install the packaged XPI (permanent, unsigned)
 ----------------------------------------------
 
-A pre-built unsigned XPI lives in `build/ariang-1.0.0.xpi`. An XPI is a plain zip
+A pre-built unsigned XPI lives in `build/ariang-1.2.0.xpi`. An XPI is a plain zip
 whose root contains `manifest.json`.
 
 * Firefox Developer Edition / Nightly accept unsigned add-ons by default.
@@ -100,7 +101,7 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
 Build the unsigned XPI locally with:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.0.0.xpi
+python tools/build_xpi.py     # writes build/ariang-1.2.0.xpi
 ```
 
 or with web-ext:

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "AriaNG",
   "short_name": "AriaNG",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "default_locale": "zh_CN",
   "description": "__MSG_description__",
   "author": "Mr.cool",
@@ -20,10 +20,6 @@
       "48": "images/logo48.png"
     },
     "default_title": "AriaNG"
-  },
-  "sidebar_action": {
-    "default_title": "AriaNG",
-    "default_panel": "ui/ariang/index.html"
   },
   "options_ui": {
     "page": "options/options.html",

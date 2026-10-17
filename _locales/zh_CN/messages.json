@@ -194,18 +194,6 @@
   "WebUIOpenStyle2": {
     "message": "新标签页"
   },
-  "WebUIOpenStyle3": {
-    "message": "新窗口"
-  },
-  "WebUIOpenStyle4": {
-    "message": "侧边栏"
-  },
-  "sidebarUnsupportedTip": {
-    "message": "当前 Firefox 版本不支持侧边栏（需要 Firefox 131 及以上）"
-  },
-  "popupFallbackTip": {
-    "message": "Firefox 不支持以编程方式直接打开弹窗，已改为新标签页打开"
-  },
   "openWebUIStr": {
     "message": "打开AriaNG"
   },

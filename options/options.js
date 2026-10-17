@@ -86,12 +86,6 @@
         appendRpcRow(i, rpcList[i]);
       }
 
-      /* sidebar availability hint */
-      if (typeof browser.sidebarAction === 'undefined') {
-        const warn = document.getElementById('sidebar-warn');
-        if (warn) warn.style.display = 'inline';
-      }
-
       const shortcutsSetting = document.getElementById('shortcuts-setting');
       if (shortcutsSetting) {
         shortcutsSetting.onclick = () => {
@@ -115,6 +109,10 @@
       if (exportBtn) exportBtn.onclick = Configs.export;
       const importBtn = document.getElementById('importConfig');
       if (importBtn) importBtn.onclick = Configs.import;
+      const uploadBtn = document.getElementById('upload');
+      if (uploadBtn) uploadBtn.onclick = Configs.upload;
+      const downloadBtn = document.getElementById('download');
+      if (downloadBtn) downloadBtn.onclick = Configs.download;
       const fileInput = document.getElementById('configFileInput');
       if (fileInput) fileInput.onchange = Configs.handleConfigImport;
 
@@ -180,6 +178,11 @@
           config[el.id] = el.value;
         }
       });
+      document.querySelectorAll('select').forEach((el) => {
+        if (el.id && A2E.DefaultConfigs.hasOwnProperty(el.id)) {
+          config[el.id] = el.value;
+        }
+      });
 
       const styleRadio = document.querySelector('input[name=webUIOpenStyle]:checked');
       if (styleRadio) config.webUIOpenStyle = styleRadio.value;
@@ -210,20 +213,29 @@
     },
 
     upload: async function () {
+      /*
+       * browser.storage.sync is the Firefox Sync store (the signed-in Firefox
+       * Account). Only plain data can be stored, so collect the config keys
+       * explicitly - never the Configs object itself (it holds functions).
+       */
+      const config = {};
+      for (const key of Object.keys(A2E.DefaultConfigs)) {
+        config[key] = Configs[key];
+      }
+      let ariaNgOptions = null;
       try {
         const ariaNgOptionsValue = localStorage.getItem(AriaNgOptionsKey);
-        Configs.ariaNgOptions = (typeof ariaNgOptionsValue === 'string')
-          ? JSON.parse(ariaNgOptionsValue)
-          : JSON.parse(JSON.stringify(A2E.DefaultAriaNgOptions));
+        if (typeof ariaNgOptionsValue === 'string') {
+          ariaNgOptions = JSON.parse(ariaNgOptionsValue);
+        }
       } catch (e) {
-        Configs.ariaNgOptions = JSON.parse(JSON.stringify(A2E.DefaultAriaNgOptions));
-        console.warn('Upload: Local AriaNG options is invalid, default is loaded.');
+        console.warn('Upload: Local AriaNG options is invalid, skipped.', e);
       }
-      if (!Configs.rpcList || !Configs.rpcList.length) {
+      if (!config.rpcList || !config.rpcList.length) {
         if (!confirm(browser.i18n.getMessage('uploadConfigWarn'))) return;
       }
       try {
-        await browser.storage.sync.set(Configs);
+        await browser.storage.sync.set({ ariangConfig: config, ariaNgOptions: ariaNgOptions });
         Configs.notifySyncResult(browser.i18n.getMessage('uploadConfigSucceed'), 'alert-success');
       } catch (error) {
         Configs.notifySyncResult(browser.i18n.getMessage('uploadConfigFailed') + ' (' + error.message + ')', 'alert-danger', 5000);
@@ -232,34 +244,23 @@
 
     download: async function () {
       try {
-        const configs = await browser.storage.sync.get(null);
-        if (Object.keys(configs).length > 0) {
-          try {
-            if (typeof configs.ariaNgOptions === 'string') {
-              configs.ariaNgOptions = JSON.parse(configs.ariaNgOptions);
-            }
-            const optionsLength = Object.keys(configs.ariaNgOptions || {}).length;
-            const defaultLength = Object.keys(A2E.DefaultAriaNgOptions).length;
-            if (optionsLength >= defaultLength) {
-              localStorage.setItem(AriaNgOptionsKey, JSON.stringify(configs.ariaNgOptions));
-            } else {
-              delete configs.ariaNgOptions;
-            }
-          } catch (e) {
-            delete configs.ariaNgOptions;
-            console.warn('Download: AriaNG options is invalid.');
-          }
-          saving = true;
-          try {
-            await browser.storage.local.set(configs);
-          } finally {
-            saving = false;
-          }
-          Configs.notifySyncResult(browser.i18n.getMessage('downloadConfigSucceed'), 'alert-success');
-          Configs.init();
-        } else {
+        const synced = await browser.storage.sync.get(null);
+        const config = synced && synced.ariangConfig;
+        if (!config || typeof config !== 'object' || Array.isArray(config)) {
           throw new TypeError('Invalid extension configs');
         }
+        /* write AriaNg.Options first so the background sync stays consistent */
+        if (synced.ariaNgOptions && typeof synced.ariaNgOptions === 'object' && !Array.isArray(synced.ariaNgOptions)) {
+          localStorage.setItem(AriaNgOptionsKey, JSON.stringify(synced.ariaNgOptions));
+        }
+        saving = true;
+        try {
+          await browser.storage.local.set(config);
+        } finally {
+          saving = false;
+        }
+        Configs.notifySyncResult(browser.i18n.getMessage('downloadConfigSucceed'), 'alert-success');
+        Configs.init();
       } catch (error) {
         Configs.notifySyncResult(browser.i18n.getMessage('downloadConfigFailed'), 'alert-danger', 5000);
       }
@@ -316,8 +317,22 @@
     },
 
     handleConfigImport: function (event) {
-      const file = event.target.files[0];
+      const input = event.target;
+      const file = input && input.files && input.files[0];
       if (!file) return;
+      /*
+       * Firefox can re-deliver the same file through a second change event
+       * (e.g. after a modal dialog is dismissed, or when the file list was
+       * assigned programmatically and value='' fails to clear it). Without
+       * this guard the import confirm dialog re-opens in a loop. Deduplicate
+       * by file identity; a re-picked file differs in lastModified/size.
+       */
+      const stamp = file.name + ':' + file.size + ':' + (file.lastModified || 0);
+      if (stamp === lastImportStamp) {
+        try { input.value = ''; } catch (e) { /* ignore */ }
+        return;
+      }
+      lastImportStamp = stamp;
       const reader = new FileReader();
       reader.onload = async function (e) {
         try {
@@ -348,10 +363,16 @@
           console.error('Import config error:', error);
           Configs.notifyResult('import-export-result',
             browser.i18n.getMessage('importConfigFailed') + ' (' + error.message + ')', 'alert-danger', 5000);
+        } finally {
+          try { input.value = ''; } catch (e) { /* ignore */ }
         }
       };
+      reader.onerror = function () {
+        try { input.value = ''; } catch (e) { /* ignore */ }
+        Configs.notifyResult('import-export-result',
+          browser.i18n.getMessage('importConfigFailed'), 'alert-danger', 5000);
+      };
       reader.readAsText(file);
-      event.target.value = '';
     }
   };
 
@@ -512,6 +533,8 @@
   /* ------------------------------------------------------------------ */
 
   let saving = false;
+  /* identity of the last imported config file - see handleConfigImport */
+  let lastImportStamp = '';
 
   window.addEventListener('DOMContentLoaded', Configs.init);
   if (window.matchMedia) {

@@ -194,18 +194,6 @@
   "WebUIOpenStyle2": {
     "message": "New tab"
   },
-  "WebUIOpenStyle3": {
-    "message": "New window"
-  },
-  "WebUIOpenStyle4": {
-    "message": "Sidebar"
-  },
-  "sidebarUnsupportedTip": {
-    "message": "This Firefox version does not support the sidebar API (Firefox 131+ required)"
-  },
-  "popupFallbackTip": {
-    "message": "Firefox cannot open the popup programmatically; opened in a new tab instead"
-  },
   "openWebUIStr": {
     "message": "Open AriaNG"
   },

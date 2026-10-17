@@ -7,7 +7,8 @@
  *   - context menus use the "browser_action" context (Chrome uses "action")
  *   - download capture uses downloads.onCreated + downloads.cancel
  *     (Chrome uses downloads.onDeterminingFilename + suggest())
- *   - sidebar uses browser.sidebarAction (Chrome uses chrome.sidePanel)
+ *   - the AriaNG UI opens in a movable popup window / tab (never the
+ *     anchored browserAction popup, which cannot be moved)
  *   - no chrome.power equivalent (keep-awake removed)
  *   - static icons + badge text (Chrome canvas icon animations removed)
  */
@@ -54,9 +55,7 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
     remoteAria2List: [],
     initGeneration: 0,
     pendingDownloads: new Map(), // downloadId -> { resolve, item } waiting for fileSize
-    suppressCaptureUntil: 0,
-    uiWindowId: 0,
-    uiWindowBounds: null
+    suppressCaptureUntil: 0
   };
 
   /* ------------------------------------------------------------------ */
@@ -632,16 +631,6 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
 
     const openStyle = getConfig('webUIOpenStyle');
 
-    if (openStyle === 'sidebar' && browser.sidebarAction) {
-      try {
-        await browser.sidebarAction.setPanel({ panel: webUiUrl });
-        await browser.sidebarAction.open();
-        return;
-      } catch (error) {
-        console.warn('[AriaNG] sidebar open failed, fallback to tab:', error);
-      }
-    }
-
     if (openStyle === 'popup') {
       /*
        * Open the AriaNG UI in a real popup window (movable / resizable).
@@ -676,35 +665,7 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
       return;
     }
 
-    if (openStyle === 'window') {
-      openInWindow(webUiUrl);
-    } else {
-      browser.tabs.create({ url: webUiUrl }).catch(() => { });
-    }
-  }
-
-  async function openInWindow(url) {
-    const defaultProps = { url: url, type: 'popup', focused: true, width: 1024, height: 600 };
-
-    let win;
-    try {
-      win = await browser.windows.create(defaultProps);
-    } catch (error) {
-      console.warn('[AriaNG] create window failed:', error);
-      return;
-    }
-    state.uiWindowId = win.id;
-  }
-
-  async function resetSidePanel(tabId) {
-    if (getConfig('webUIOpenStyle') !== 'sidebar' || !browser.sidebarAction) return;
-    try {
-      const options = await browser.sidebarAction.getPanel({ windowId: undefined });
-      const defaultPath = browser.runtime.getURL('ui/ariang/index.html');
-      if (options && options.panel && !options.panel.startsWith(defaultPath)) {
-        await browser.sidebarAction.setPanel({ panel: defaultPath });
-      }
-    } catch (e) { /* ignore */ }
+    browser.tabs.create({ url: webUiUrl }).catch(() => { });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1004,15 +965,12 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
      * Never attach an anchored browserAction popup: it is pinned to the
      * toolbar and cannot be moved. With no popup attached, left click fires
      * browserAction.onClicked and the AriaNG UI opens per webUIOpenStyle
-     * (movable popup window / tab / window / sidebar).
+     * (movable popup window / tab).
      */
     try {
       browser.browserAction.setPopup({ popup: '' }).catch(() => { });
     } catch (error) {
       /* some versions reject the empty string - no popup is the default anyway */
-    }
-    if (getConfig('webUIOpenStyle') === 'sidebar' && browser.sidebarAction) {
-      browser.sidebarAction.setTitle({ title: 'AriaNG' }).catch(() => { });
     }
   }
 
@@ -1070,7 +1028,6 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
         state.currentTabUrl = tab.url || 'about:blank';
         updateOptionMenu(tab).catch(() => { });
       }
-      resetSidePanel(tabId);
     });
 
     browser.tabs.onActivated.addListener(function (activeInfo) {
@@ -1078,7 +1035,6 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
         state.currentTabUrl = (tab && tab.url) || 'about:blank';
         updateOptionMenu(tab).catch(() => { });
       }).catch(() => { });
-      resetSidePanel(activeInfo.tabId);
     });
 
     browser.windows.onFocusChanged.addListener(function (windowId) {
@@ -1096,11 +1052,6 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
         launchUI(id);
       }
       browser.notifications.clear(id).catch(() => { });
-    });
-
-    browser.windows.onRemoved.addListener(function (windowId) {
-      if (windowId !== state.uiWindowId) return;
-      state.uiWindowId = null;
     });
 
     browser.commands.onCommand.addListener(function (command) {
@@ -1146,7 +1097,7 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
 
       const needReInit = changes.rpcList || changes.contextMenus || changes.askBeforeExport ||
         changes.exportAll || changes.allowNotification || changes.integration ||
-        changes.monitorAria2 || changes.monitorAll || changes.webUIOpenStyle ||
+        changes.monitorAria2 || changes.monitorAll ||
         changes.iconOffStyle;
 
       if (needReInit) {
