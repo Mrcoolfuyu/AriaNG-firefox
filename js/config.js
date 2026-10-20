@@ -59,6 +59,64 @@ A2E.normalizeIconOffStyle = function (value) {
   return "Gray";
 };
 
+/*
+ * AriaNG UI popup window.
+ *
+ * AriaNG's bundled stylesheet hides the whole left menu below 768 CSS px
+ * (Bootstrap 3 "xs" breakpoint: `.main-sidebar` is translated off-canvas), so a
+ * narrower window silently drops the navigation tree. minWidth keeps 230px of
+ * sidebar plus enough room for the task table; the window is clamped to these
+ * values both when it is created and while the user drags it smaller.
+ */
+A2E.UiWindow = {
+  minWidth: 920,
+  minHeight: 600,
+  defaultWidth: 1000,
+  defaultHeight: 680,
+  storageKey: 'uiWindowBounds'
+};
+
+/*
+ * Validate a stored {width, height, left, top, maximized} record.
+ * Anything unusable falls back to the defaults; a position that is no longer on
+ * screen (unplugged monitor, changed resolution) is dropped so the window opens
+ * centred instead of off-screen.
+ */
+A2E.sanitizeUiBounds = function (value, screenSize) {
+  const spec = A2E.UiWindow;
+  const source = (value && typeof value === 'object') ? value : {};
+  const screenWidth = (screenSize && screenSize.width) || 1920;
+  const screenHeight = (screenSize && screenSize.height) || 1080;
+
+  function dimension(v, min, fallback) {
+    const n = Math.round(Number(v));
+    if (!isFinite(n) || n <= 0) return fallback;
+    return Math.max(n, min);
+  }
+
+  const result = {
+    width: dimension(source.width, spec.minWidth, spec.defaultWidth),
+    height: dimension(source.height, spec.minHeight, spec.defaultHeight),
+    left: null,
+    top: null,
+    maximized: source.maximized === true
+  };
+
+  const left = Math.round(Number(source.left));
+  const top = Math.round(Number(source.top));
+  /* generous plausibility test - multi-monitor setups legitimately use negative
+   * coordinates, but a wild number means the monitor is gone: re-centre instead */
+  const fitsOnScreen = isFinite(left) && isFinite(top) &&
+    left > -screenWidth * 2 && top > -screenHeight * 2 &&
+    left < screenWidth * 2 && top < screenHeight * 2;
+
+  if (fitsOnScreen) {
+    result.left = left;
+    result.top = top;
+  }
+  return result;
+};
+
 /* AriaNG built-in default options (subset used to seed AriaNg.Options) */
 A2E.DefaultAriaNgOptions = {
   language: 'TBD',

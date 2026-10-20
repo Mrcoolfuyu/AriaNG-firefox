@@ -66,6 +66,18 @@ Firefox-specific notes (differences from the Chrome original)
 * The "popup" open style opens a real popup window (`windows.create` with
   `type: 'popup'`) instead of the anchored `browserAction` popup, so the window can be
   moved and resized like any other window.
+* Popup window sizing (`A2E.UiWindow` in `js/config.js`): the minimum is
+  920x600 - AriaNG's bundled stylesheet hides the whole left menu below 768 CSS
+  px, so a narrower window silently loses the navigation tree. There is no
+  min-size API, so the popup page puts the window back when it is dragged smaller.
+* The window remembers its size, position and maximized state across launches
+  (`uiWindowBounds` in `browser.storage.local`). Firefox has no
+  `windows.onBoundsChanged` (Chromium-only event), so the popup page reports its
+  own geometry through `runtime.sendMessage` (`UI_WINDOW_BOUNDS`) on resize and
+  once per poll - the poll is what catches moving the window.
+* Firefox draws the maximize button of a popup window greyed out and inactive.
+  `windows.update({ state: 'maximized' })` does work there, so `popup/popup.html`
+  carries its own maximize / restore button in the top-right corner.
 * RPC configuration lives in two places - the extension storage (options page) and
   AriaNG's own `AriaNg.Options` localStorage. They are reconciled on every open:
   edits made inside the AriaNG UI are adopted back into the extension config instead
@@ -95,7 +107,7 @@ Install (for development / sideload)
 Install the packaged XPI (permanent, unsigned)
 ----------------------------------------------
 
-A pre-built unsigned XPI lives in `build/ariang-1.5.0.xpi`. An XPI is a plain zip
+A pre-built unsigned XPI lives in `build/ariang-1.6.0.xpi`. An XPI is a plain zip
 whose root contains `manifest.json`.
 
 * Firefox Developer Edition / Nightly accept unsigned add-ons by default.
@@ -114,7 +126,7 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
 Build the unsigned XPI locally with:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.5.0.xpi
+python tools/build_xpi.py     # writes build/ariang-1.6.0.xpi
 ```
 
 or with web-ext:

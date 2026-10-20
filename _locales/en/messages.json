@@ -319,5 +319,11 @@
   },
   "copyright": {
     "message": "© 2026 Mr.cool"
+  },
+  "maximizeWindow": {
+    "message": "Maximize window"
+  },
+  "restoreWindow": {
+    "message": "Restore window"
   }
 }

@@ -19,12 +19,59 @@
       border: 0px;
       display: block;
     }
+    /*
+     * Firefox does not give popup windows a working maximize button in the
+     * native title bar (it is drawn greyed out), so provide one of our own.
+     * Kept subtle: translucent, brighter on hover, sitting on AriaNG's dark
+     * header bar.
+     */
+    #window-controls {
+      position: fixed;
+      top: 0px;
+      right: 0px;
+      z-index: 2147483647;
+      display: flex;
+    }
+    #window-controls[hidden] {
+      display: none;
+    }
+    #window-controls button {
+      width: 36px;
+      height: 32px;
+      margin: 0px;
+      padding: 0px;
+      border: 0px;
+      background-color: rgba(0, 0, 0, 0.16);
+      color: #ffffff;
+      cursor: pointer;
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s ease, background-color 0.15s ease;
+    }
+    #window-controls button:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    #window-controls button:focus-visible {
+      opacity: 1;
+      outline: 1px solid #ffffff;
+    }
+    #window-controls svg {
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
   </style>
   <script src="../js/config.js"></script>
   <script src="../js/utils.js"></script>
 </head>
 <body>
   <iframe id="AriaNG" src="about:blank" frameborder="0" scrolling="no"></iframe>
+  <div id="window-controls" hidden>
+    <button id="toggle-maximize" type="button"></button>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>

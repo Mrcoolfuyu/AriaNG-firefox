@@ -55,7 +55,9 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
     remoteAria2List: [],
     initGeneration: 0,
     pendingDownloads: new Map(), // downloadId -> { resolve, item } waiting for fileSize
-    suppressCaptureUntil: 0
+    suppressCaptureUntil: 0,
+    uiBoundsTimer: null,         // debounce for saving the popup window geometry
+    uiPendingBounds: null
   };
 
   /* ------------------------------------------------------------------ */
@@ -605,6 +607,78 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
   /* ariaNG web ui launching                                            */
   /* ------------------------------------------------------------------ */
 
+  function currentScreenSize() {
+    try {
+      if (typeof screen !== 'undefined' && screen.availWidth) {
+        return { width: screen.availWidth, height: screen.availHeight };
+      }
+    } catch (error) { /* no screen (rare) */ }
+    return null;
+  }
+
+  async function loadUiBounds() {
+    let stored = null;
+    try {
+      stored = await browser.storage.local.get(A2E.UiWindow.storageKey);
+    } catch (error) {
+      console.warn('[AriaNG] read ui bounds failed', error);
+    }
+    const record = stored ? stored[A2E.UiWindow.storageKey] : null;
+    return A2E.sanitizeUiBounds(record, currentScreenSize());
+  }
+
+  /*
+   * Remember the popup window geometry so the next launch reopens at the same
+   * place and size. Firefox has no windows.onBoundsChanged (that event is
+   * Chromium-only), so the popup page reports its own geometry - see popup.js.
+   * Writes are debounced: the page reports on every resize and once per poll.
+   */
+  function queueUiBoundsSave(data) {
+    if (!data || typeof data !== 'object') return;
+    state.uiPendingBounds = data;
+    if (state.uiBoundsTimer) clearTimeout(state.uiBoundsTimer);
+    state.uiBoundsTimer = setTimeout(function () {
+      flushUiBoundsSave().catch(() => { });
+    }, 600);
+  }
+
+  async function flushUiBoundsSave() {
+    state.uiBoundsTimer = null;
+    const data = state.uiPendingBounds;
+    state.uiPendingBounds = null;
+    if (!data) return;
+
+    const spec = A2E.UiWindow;
+    const patch = {};
+
+    if (data.state === 'maximized') {
+      /* maximized bounds are not worth storing - keep the last normal geometry */
+      patch.maximized = true;
+    } else if (data.state === 'normal') {
+      patch.maximized = false;
+      /* the floor is enforced by the popup page; clamp again as a safety net */
+      patch.width = Math.max(Math.round(Number(data.width) || 0), spec.minWidth);
+      patch.height = Math.max(Math.round(Number(data.height) || 0), spec.minHeight);
+      patch.left = Math.round(Number(data.left) || 0);
+      patch.top = Math.round(Number(data.top) || 0);
+    } else {
+      return; /* minimized - nothing to remember */
+    }
+
+    const current = await loadUiBounds();
+    const next = Object.assign({}, current, patch);
+    if (next.width === current.width && next.height === current.height &&
+      next.left === current.left && next.top === current.top &&
+      next.maximized === current.maximized) {
+      return;
+    }
+    try {
+      await browser.storage.local.set({ [spec.storageKey]: next });
+    } catch (error) {
+      console.warn('[AriaNG] save ui bounds failed', error);
+    }
+  }
+
   async function launchUI(info) {
     const index = browser.runtime.getURL('ui/ariang/index.html');
     let webUiUrl = index + '#!';
@@ -645,14 +719,30 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
       const popupUrl = browser.runtime.getURL('popup/popup.html');
       /* webUiUrl is index + '#!...', so the substring already carries the '#' */
       const hash = (webUiUrl !== index) ? webUiUrl.substring(index.length) : '';
+      const bounds = await loadUiBounds();
+      const createData = {
+        type: 'popup',
+        url: popupUrl + hash,
+        width: bounds.width,
+        height: bounds.height,
+        focused: true
+      };
+      if (bounds.left !== null && bounds.top !== null) {
+        createData.left = bounds.left;
+        createData.top = bounds.top;
+      }
       try {
-        await browser.windows.create({
-          type: 'popup',
-          url: popupUrl + hash,
-          width: 800,
-          height: 640,
-          focused: true
-        });
+        const win = await browser.windows.create(createData);
+        if (win && win.id !== undefined) {
+          /*
+           * Firefox popup windows cannot be maximized from their title bar, but
+           * windows.update({state:'maximized'}) does work - restore the state the
+           * window was closed in.
+           */
+          if (bounds.maximized) {
+            await browser.windows.update(win.id, { state: 'maximized' }).catch(() => { });
+          }
+        }
         return;
       } catch (error) {
         console.warn('[AriaNG] create popup window failed, fallback to tab:', error);
@@ -1093,6 +1183,13 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
           break;
         case 'CLICK_EVENT':
           state.altKeyPressed = !!(message.data && message.data.altKeyPressed);
+          break;
+        case 'UI_WINDOW_BOUNDS':
+          /* only the AriaNG popup page may report window geometry */
+          if (sender && typeof sender.url === 'string' &&
+            sender.url.indexOf(browser.runtime.getURL('popup/popup.html')) === 0) {
+            queueUiBoundsSave(message.data);
+          }
           break;
       }
     });
