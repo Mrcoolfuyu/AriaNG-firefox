@@ -1,7 +1,13 @@
 AriaNG - Firefox Extension
 ==========================
 
-让Aria2无缝接管下载，内置AriaNG前端。
+English | [简体中文](README.zh-CN.md)
+
+Let Aria2 seamlessly take over downloads, with the AriaNG frontend built in.
+
+**[Install from addons.mozilla.org](https://addons.mozilla.org/addon/aria2ng/)** -
+one click, signed and auto-updating. Requires your own aria2 with RPC enabled
+(the add-on ships no server component).
 
 A Firefox WebExtensions addon built on top of [AriaNg](https://github.com/mayswind/AriaNg) 1.3.15
 (AllInOne build). It captures browser downloads and magnet links to your aria2 RPC server,
@@ -14,6 +20,54 @@ Firefox WebExtensions API.
 Author: Mr.cool
 Homepage: https://github.com/Mrcoolfuyu/
 License: MIT
+Current version: 1.6.0
+
+Install
+-------
+
+### From addons.mozilla.org (recommended)
+
+1. Open <https://addons.mozilla.org/addon/aria2ng/> in Firefox (desktop 141 or newer).
+2. Click **Add to Firefox** and confirm the permission prompt.
+3. Open the add-on options and fill in your aria2 RPC server, for example
+   `ws://192.168.50.100:6800/jsonrpc` plus the secret key.
+
+The AMO build is signed by Mozilla, survives restarts and updates itself.
+
+### Before you install: you need aria2
+
+The add-on is a front end only. It cannot download anything until it can reach an
+aria2 instance with JSON-RPC enabled - on the same machine, on your NAS, or on a
+remote seedbox:
+
+```sh
+aria2c --enable-rpc --rpc-listen-all --rpc-secret=your-secret
+```
+
+Files above the configured size threshold and magnet/BitTorrent links are handed to
+that instance; everything smaller keeps going through Firefox.
+
+### Manual install (development / sideload)
+
+Temporary add-on, gone after a restart:
+
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on...** and select `manifest.json` from this repository.
+
+Unsigned XPI, permanent (an XPI is a plain zip with `manifest.json` at its root;
+the build lives in `build/ariang-1.6.0.xpi`):
+
+* Firefox Developer Edition / Nightly accept unsigned add-ons by default.
+* On Release/Beta, either set `xpinstall.signatures.required` to `false` in
+  `about:config` first, or install a signed build from AMO.
+* Install by dragging the `.xpi` onto a Firefox window, or via
+  `File` -> `Open File...`, and confirm the prompt.
+
+Signing for public distribution:
+
+```sh
+npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
+```
 
 Features
 --------
@@ -43,6 +97,12 @@ Features
 * AriaNG UI
   * Full AriaNG 1.3.15 frontend embedded in a popup window or a new tab.
   * The extension keeps AriaNG's RPC configuration in sync with the extension settings.
+* Window behaviour (popup style)
+  * Minimum size 920x600, so the AriaNG side menu is always visible (it hides below
+    768 CSS px).
+  * Size, position and maximized state are remembered between launches.
+  * Its own maximize / restore button - Firefox disables the title-bar one for
+    popup windows.
 * Icons
   * Product icon: blue download arrow (`images/ariang-blue.svg`, rasterised to
     16/32/48/64/128 PNG).
@@ -95,38 +155,42 @@ Firefox-specific notes (differences from the Chrome original)
   **Re-check this patch after upgrading the AriaNG bundle** - if the bundle stops being
   the last `<script>`, the routes silently break again.
 
-Install (for development / sideload)
------------------------------------
+RPC configuration
+-----------------
 
-1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
-2. Click "Load Temporary Add-on..." and select `manifest.json` from this repository.
-   (Temporary add-ons are removed when Firefox restarts.)
-3. Open the extension options and configure your aria2 RPC server, e.g.
-   `ws://192.168.50.100:6800/jsonrpc` with your secret key.
+Multiple aria2 servers can be configured on the options page. Each entry has:
 
-Install the packaged XPI (permanent, unsigned)
-----------------------------------------------
+* name - display name
+* secret key - aria2 RPC secret (stored URL-encoded inside the RPC URL)
+* download dir - default `dir` for tasks created through this server
+* URL pattern(s) - comma-separated patterns; a task URL matching a pattern is routed to
+  that server. `*` marks the default server.
 
-A pre-built unsigned XPI lives in `build/ariang-1.6.0.xpi`. An XPI is a plain zip
-whose root contains `manifest.json`.
+AriaNG's own settings (language, theme, ...) are stored in the extension origin
+localStorage under `AriaNg.Options` and are preserved across settings syncs.
 
-* Firefox Developer Edition / Nightly accept unsigned add-ons by default.
-* On Release/Beta, either set `xpinstall.signatures.required` to `false` in
-  `about:config` first, or install a signed build (see below).
-* Install by dragging the `.xpi` onto a Firefox window, or via
-  `File` -> `Open File...`, and confirm the prompt. Unlike the temporary load
-  above, this install survives restarts.
+Development
+-----------
 
-For a publicly distributed build, submit the package to AMO for signing:
-
-```sh
-npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
+```
+manifest.json          MV2 manifest (Firefox)
+js/config.js           default configuration
+js/utils.js            shared utilities (i18n, RPC URL helpers, ...)
+js/aria2.js            minimal aria2 JSON-RPC client (WebSocket + HTTP fallback)
+js/background.js       background page: menus, capture, monitor, notifications
+js/content/            content scripts (magnet capture, export all links)
+popup/                 popup window wrapper embedding the AriaNG UI
+options/               options page (vanilla JS/CSS)
+ui/ariang/             AriaNg 1.3.15 AllInOne build (inline scripts extracted to js/)
+tools/build_xpi.py     stdlib-only script that packages build/ariang-<version>.xpi
+images/                toolbar / action icons (product blue arrow + blue/green/gray variants)
+_locales/              zh_CN (default) and en messages
 ```
 
-Build the unsigned XPI locally with:
+Build the unsigned XPI locally:
 
 ```sh
-python tools/build_xpi.py     # writes build/ariang-1.6.0.xpi
+python tools/build_xpi.py     # writes build/ariang-<version>.xpi
 ```
 
 or with web-ext:
@@ -164,39 +228,6 @@ Two linter findings were fixed in v1.5.0 and should not be reintroduced:
   development-only and is excluded from the XPI (`SKIP_DIRS` in
   `tools/build_xpi.py`). Anything else development-only (`tools/`, `.gitignore`,
   `.gitattributes`) is excluded too.
-
-RPC configuration
------------------
-
-Multiple aria2 servers can be configured on the options page. Each entry has:
-
-* name - display name
-* secret key - aria2 RPC secret (stored URL-encoded inside the RPC URL)
-* RPC URL - e.g. `ws://host:6800/jsonrpc` or `http://host:6800/jsonrpc`
-* download dir - default `dir` for tasks created through this server
-* URL pattern(s) - comma-separated patterns; a task URL matching a pattern is routed to
-  that server. `*` marks the default server.
-
-AriaNG's own settings (language, theme, ...) are stored in the extension origin
-localStorage under `AriaNg.Options` and are preserved across settings syncs.
-
-Development
------------
-
-```
-manifest.json          MV2 manifest (Firefox)
-js/config.js           default configuration
-js/utils.js            shared utilities (i18n, RPC URL helpers, ...)
-js/aria2.js            minimal aria2 JSON-RPC client (WebSocket + HTTP fallback)
-js/background.js       background page: menus, capture, monitor, notifications
-js/content/            content scripts (magnet capture, export all links)
-popup/                 toolbar popup embedding the AriaNG UI
-options/               options page (vanilla JS/CSS)
-ui/ariang/             AriaNg 1.3.15 AllInOne build (inline scripts extracted to js/)
-tools/build_xpi.py     stdlib-only script that packages build/ariang-<version>.xpi
-images/                toolbar / action icons (product blue arrow + blue/green/gray variants)
-_locales/              zh_CN (default) and en messages
-```
 
 Credits
 -------

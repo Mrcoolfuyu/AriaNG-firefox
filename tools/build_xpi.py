@@ -22,7 +22,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # that can identify a binary component), which pulls the submission into manual
 # binary-content review for no reason.
 SKIP_DIRS = {'.git', '__pycache__', 'node_modules', 'tools', '.workbuddy'}
-SKIP_FILES = {'.DS_Store', 'Thumbs.db', '.gitignore', '.gitattributes'}
+SKIP_FILES = {
+    '.DS_Store', 'Thumbs.db', '.gitignore', '.gitattributes',
+    # development docs - acknowledgment.txt stays, AMO reviewers read it
+    'README.md', 'README.zh-CN.md',
+}
 
 
 def find_source():
