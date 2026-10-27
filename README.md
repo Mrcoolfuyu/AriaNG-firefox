@@ -98,6 +98,8 @@ Features
   * Full AriaNG 1.3.15 frontend embedded in a popup window or a new tab.
   * The extension keeps AriaNG's RPC configuration in sync with the extension settings.
 * Window behaviour (popup style)
+  * Clicking the toolbar icon again focuses the window that is already open instead of
+    opening a second one; deep links (captured download, new task) are handed over to it.
   * Minimum size 920x600, so the AriaNG side menu is always visible (it hides below
     768 CSS px).
   * Size, position and maximized state are remembered between launches.

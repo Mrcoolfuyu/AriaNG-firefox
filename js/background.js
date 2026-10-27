@@ -57,7 +57,8 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
     pendingDownloads: new Map(), // downloadId -> { resolve, item } waiting for fileSize
     suppressCaptureUntil: 0,
     uiBoundsTimer: null,         // debounce for saving the popup window geometry
-    uiPendingBounds: null
+    uiPendingBounds: null,
+    uiWindowId: null             // the popup window currently hosting the UI
   };
 
   /* ------------------------------------------------------------------ */
@@ -679,6 +680,49 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
     }
   }
 
+  /*
+   * The UI window may already be open - clicking the toolbar button again must
+   * focus it instead of stacking a second copy. state.uiWindowId is only a
+   * shortcut (it is lost when the background page restarts), so scan the
+   * window list as well and match on our popup page URL.
+   */
+  async function findUiWindow() {
+    const popupUrl = browser.runtime.getURL('popup/popup.html');
+    let list = [];
+    try {
+      list = await browser.windows.getAll({ populate: true });
+    } catch (error) {
+      return null;
+    }
+    let fallback = null;
+    for (const win of list) {
+      for (const tab of (win.tabs || [])) {
+        if (typeof tab.url !== 'string' || tab.url.indexOf(popupUrl) !== 0) continue;
+        const hit = { win: win, tab: tab };
+        if (win.id === state.uiWindowId) return hit;
+        if (!fallback) fallback = hit;
+      }
+    }
+    if (!fallback) state.uiWindowId = null;
+    return fallback;
+  }
+
+  async function focusUiWindow(hit, hash) {
+    const win = hit.win;
+    state.uiWindowId = win.id;
+    if (win.state === 'minimized') {
+      /* focused:true alone does not bring a minimized window back */
+      await browser.windows.update(win.id, { state: 'normal' }).catch(() => { });
+    }
+    await browser.windows.update(win.id, { focused: true }).catch(() => { });
+
+    /* a deep link (download capture / new task) still has to be shown */
+    if (hash && hit.tab && hit.tab.id !== undefined) {
+      browser.tabs.sendMessage(hit.tab.id, { type: 'UI_NAVIGATE', hash: hash })
+        .catch(() => { });
+    }
+  }
+
   async function launchUI(info) {
     const index = browser.runtime.getURL('ui/ariang/index.html');
     let webUiUrl = index + '#!';
@@ -719,6 +763,13 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
       const popupUrl = browser.runtime.getURL('popup/popup.html');
       /* webUiUrl is index + '#!...', so the substring already carries the '#' */
       const hash = (webUiUrl !== index) ? webUiUrl.substring(index.length) : '';
+
+      const existing = await findUiWindow();
+      if (existing) {
+        await focusUiWindow(existing, hash);
+        return;
+      }
+
       const bounds = await loadUiBounds();
       const createData = {
         type: 'popup',
@@ -734,6 +785,7 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
       try {
         const win = await browser.windows.create(createData);
         if (win && win.id !== undefined) {
+          state.uiWindowId = win.id;
           /*
            * Firefox popup windows cannot be maximized from their title bar, but
            * windows.update({state:'maximized'}) does work - restore the state the
@@ -1140,6 +1192,10 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
           updateOptionMenu(tabs[0]).catch(() => { });
         }
       }).catch(() => { });
+    });
+
+    browser.windows.onRemoved.addListener(function (windowId) {
+      if (windowId === state.uiWindowId) state.uiWindowId = null;
     });
 
     browser.notifications.onClicked.addListener(function (id) {

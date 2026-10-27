@@ -28,6 +28,13 @@
   var reportTimer = null;
   var clampTimer = null;
 
+  /* build the icon nodes from the markup above (no innerHTML assignment: the
+     AMO linter flags it as UNSAFE_VAR_ASSIGNMENT even for static strings) */
+  function svgNode(markup) {
+    const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
+    return document.importNode(doc.documentElement, true);
+  }
+
   function minSize() {
     return (window.A2E && A2E.UiWindow) ? A2E.UiWindow : { minWidth: 920, minHeight: 600 };
   }
@@ -124,7 +131,7 @@
     function render(state) {
       const maximized = state === 'maximized';
       const label = browser.i18n.getMessage(maximized ? 'restoreWindow' : 'maximizeWindow');
-      button.innerHTML = maximized ? ICON_RESTORE : ICON_MAXIMIZE;
+      button.replaceChildren(svgNode(maximized ? ICON_RESTORE : ICON_MAXIMIZE));
       button.title = label;
       button.setAttribute('aria-label', label);
     }
@@ -163,12 +170,24 @@
     watchGeometry();
   }
 
+  var UI_BASE = '../ui/ariang/index.html';
+
+  /* the window is reused when it is already open, so deep links arrive as a message */
+  browser.runtime.onMessage.addListener(function (message) {
+    if (!message || message.type !== 'UI_NAVIGATE' || typeof message.hash !== 'string') return;
+    const element = document.getElementById('AriaNG');
+    if (!element) return;
+    const target = UI_BASE + message.hash;
+    if (element.getAttribute('src') === target) return;
+    element.src = target;
+  });
+
   async function main() {
     setupWindow().catch(() => { });
     await syncAriaNgOptions();
     const element = document.getElementById('AriaNG');
     /* forward the popup page hash (deep links such as #!new?url=...) to the iframe */
-    element.src = '../ui/ariang/index.html' + (window.location.hash || '');
+    element.src = UI_BASE + (window.location.hash || '');
   }
 
   main();
