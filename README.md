@@ -106,10 +106,10 @@ Features
   * Its own maximize / restore button - Firefox disables the title-bar one for
     popup windows.
 * Icons
-  * Product icon: blue download arrow (`images/ariang-blue.svg`, rasterised to
-    16/32/48/64/128 PNG).
+  * Product icon: the Aria2 mark - a rounded tile with a white "A" and an orange
+    accent bar (`images/ariang-navy.svg`, rasterised to 16/32/48/64/128 PNG).
   * While capture is turned off the toolbar icon uses the colour picked in
-    "拦截关闭状态图标" (gray / green / blue).
+    "拦截关闭状态图标" (navy / green / gray, navy by default).
 * Options page
   * All of the above plus: capture-off icon colour, config cloud sync (browser sync storage),
     config import/export (JSON file), light/dark/system color mode.
@@ -185,7 +185,7 @@ popup/                 popup window wrapper embedding the AriaNG UI
 options/               options page (vanilla JS/CSS)
 ui/ariang/             AriaNg 1.3.15 AllInOne build (inline scripts extracted to js/)
 tools/build_xpi.py     stdlib-only script that packages build/ariang-<version>.xpi
-images/                toolbar / action icons (product blue arrow + blue/green/gray variants)
+images/                toolbar / action icons (Aria2 tile: navy default + green/gray variants)
 _locales/              zh_CN (default) and en messages
 ```
 

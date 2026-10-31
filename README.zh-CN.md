@@ -92,8 +92,8 @@ npx web-ext sign --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET
   * 自带最大化 / 还原按钮——Firefox 不提供弹窗标题栏的最大化。
 
 * 图标
-  * 产品图标：蓝色下载箭头（`images/ariang-blue.svg`，光栅化为 16/32/48/64/128 PNG）。
-  * 拦截关闭时，工具栏图标使用「拦截关闭状态图标」中选定的颜色（灰 / 绿 / 蓝）。
+  * 产品图标：Aria2 标记——圆角底板上一个白色的「A」，中间一道橙色横杠（`images/ariang-navy.svg`，光栅化为 16/32/48/64/128 PNG）。
+  * 拦截关闭时，工具栏图标使用「拦截关闭状态图标」中选定的颜色（海军蓝 / 绿 / 灰，默认海军蓝）。
 * 选项页
   * 以上全部，另加：拦截关闭时的图标颜色、配置云同步（browser sync storage）、配置导入导出（JSON 文件）、浅色/深色/跟随系统。
 

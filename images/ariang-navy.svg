@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32" role="img" aria-label="Aria2">
+  <!-- Aria2 mark: rounded tile + white A with an orange accent bar -->
+  <rect width="512" height="512" rx="112" fill="#173E6B"/>
+  <path d="M 146 416 L 256 96 L 366 416" stroke="#FFFFFF" stroke-width="34" stroke-linecap="butt" stroke-linejoin="miter" fill="none"/>
+  <path d="M 152 326 H 360" stroke="#FF8330" stroke-width="34" stroke-linecap="butt" fill="none"/>
+</svg>

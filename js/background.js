@@ -138,18 +138,20 @@ A2E.menus = (typeof browser !== 'undefined' && browser.menus) ? browser.menus : 
   /* ------------------------------------------------------------------ */
 
   /*
-   * The product icon is the blue download arrow (logo<size>.png); the other
+   * The product icon is the navy Aria2 tile (logo<size>.png); the other
    * colours live next to it as logo<size>-<colour>.png.
    */
   function iconPathFor(style, size) {
-    const colour = String(style || 'Blue').toLowerCase();
-    if (!colour || colour === 'blue' || colour === 'default') return 'images/logo' + size + '.png';
+    const colour = String(style || 'Navy').toLowerCase();
+    if (!colour || colour === 'navy' || colour === 'blue' || colour === 'default') {
+      return 'images/logo' + size + '.png';
+    }
     return 'images/logo' + size + '-' + colour + '.png';
   }
 
   function refreshActionIcon() {
     const integration = getConfig('integration');
-    const style = integration ? 'Blue' : A2E.normalizeIconOffStyle(getConfig('iconOffStyle'));
+    const style = integration ? 'Navy' : A2E.normalizeIconOffStyle(getConfig('iconOffStyle'));
     const path = {
       16: iconPathFor(style, 16),
       32: iconPathFor(style, 32),

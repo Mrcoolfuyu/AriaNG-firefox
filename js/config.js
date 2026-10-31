@@ -29,7 +29,7 @@ A2E.DefaultConfigs = {
   ],
   /* ariaNG web ui */
   webUIOpenStyle: "popup",   // popup | tab
-  iconOffStyle: "Gray",      // Gray | Green | Blue (icon shown when capture is off)
+  iconOffStyle: "Navy",      // Navy | Green | Gray (icon shown when capture is off)
   /* filters */
   allowedSites: [],
   blockedSites: [],
@@ -41,22 +41,22 @@ A2E.DefaultConfigs = {
 
 /* Icon shown while download capture is turned off - keep in sync with the
  * radio group in options/options.html */
-A2E.IconOffStyles = ["Gray", "Green", "Blue"];
+A2E.IconOffStyles = ["Navy", "Green", "Gray"];
 
 /*
- * Map any stored value (including the styles shipped before v1.3.0:
- * Default / Dark / Dusk / Grey) to one of IconOffStyles. Old values cannot be
- * mapped 1:1 because their artwork was replaced by the current download-arrow
- * icon set, so they degrade to the closest colour.
+ * Map any stored value (including the styles shipped before v1.8.0:
+ * Blue / Default / Dark / Dusk / Grey) to one of IconOffStyles. Old values
+ * cannot be mapped 1:1 because their artwork (the download arrow) was replaced
+ * by the Aria2 tile icon, so they degrade to the closest colour.
  */
 A2E.normalizeIconOffStyle = function (value) {
-  const legacy = { default: "Blue", dark: "Blue", dusk: "Blue", grey: "Gray" };
+  const legacy = { default: "Navy", dark: "Navy", dusk: "Navy", blue: "Navy", grey: "Gray" };
   const key = String(value === undefined || value === null ? "" : value).toLowerCase();
   if (legacy.hasOwnProperty(key)) return legacy[key];
   for (const style of A2E.IconOffStyles) {
     if (style.toLowerCase() === key) return style;
   }
-  return "Gray";
+  return "Navy";
 };
 
 /*

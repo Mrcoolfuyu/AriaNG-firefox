@@ -179,8 +179,8 @@
   "iconStyleGreen": {
     "message": "绿色"
   },
-  "iconStyleBlue": {
-    "message": "蓝色"
+  "iconStyleNavy": {
+    "message": "海军蓝"
   },
   "WebUIOpenStyleStr": {
     "message": "AriaNG打开方式"
